@@ -1,9 +1,10 @@
 lexical-core
 ============
 
-[![Build Status](https://api.travis-ci.org/Alexhuszagh/rust-lexical.svg?branch=master)](https://travis-ci.org/Alexhuszagh/rust-lexical)
-[![Latest Version](https://img.shields.io/crates/v/lexical-core.svg)](https://crates.io/crates/lexical-core)
-[![Rustc Version 1.37+](https://img.shields.io/badge/rustc-1.37+-lightgray.svg)](https://blog.rust-lang.org/2019/08/15/Rust-1.37.0.html)
+**UNOFFICIAL**: this repo is a version of the described crate with some errors fixed from a reverse engineering challenge.
+The build and version labels have been removed from here to reflect this.
+
+---
 
 Low-level, lexical conversion routines for use in a `no_std` context. This crate by default does not use the Rust standard library.
 
