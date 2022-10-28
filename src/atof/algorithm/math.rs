@@ -8,6 +8,7 @@
 // come in handy later. These aren't trivial to implement, so keep them.
 #![allow(dead_code)]
 
+use std::convert::TryInto;
 use crate::util::*;
 
 // ALIASES
@@ -1040,7 +1041,7 @@ perftools_inline!{
 pub fn trailing_zeros(x: &[Limb]) -> usize {
     // Get the index of the last non-zero value
     let index = trailing_zero_limbs(x);
-    let mut count = index.saturating_mul(Limb::BITS);
+    let mut count = index.saturating_mul(Limb::BITS.try_into().unwrap());
     if let Some(value) = x.get(index) {
         count = count.saturating_add(value.trailing_zeros().as_usize());
     }
@@ -1055,9 +1056,9 @@ pub fn bit_length(x: &[Limb]) -> usize {
     // Avoid overflowing, calculate via total number of bits
     // minus leading zero bits.
     let nlz = leading_zeros(x);
-    Limb::BITS.checked_mul(x.len())
-        .map(|v| v - nlz)
-        .unwrap_or(usize::max_value())
+    Limb::BITS.checked_mul(x.len().try_into().unwrap())
+        .map(|v| v - (nlz as u32))
+        .unwrap_or(usize::max_value() as u32) as usize
 }}
 
 // BIT LENGTH
@@ -1082,14 +1083,14 @@ pub fn ishr_bits<T>(x: &mut T, n: usize)
 {
     // Need to shift by the number of `bits % Limb::BITS`.
     let bits = Limb::BITS;
-    debug_assert!(n < bits && n != 0);
+    debug_assert!(n < (bits as usize) && n != 0);
 
     // Internally, for each item, we shift left by n, and add the previous
     // right shifted limb-bits.
     // For example, we transform (for u8) shifted right 2, to:
     //      b10100100 b01000010
     //        b101001 b00010000
-    let lshift = bits - n;
+    let lshift = bits - (n as u32);
     let rshift = n;
     let mut prev: Limb = 0;
     for xi in x.iter_mut().rev() {
@@ -1131,8 +1132,8 @@ pub fn ishr<T>(x: &mut T, n: usize)
     let bits = Limb::BITS;
     // Need to pad with zeros for the number of `bits / Limb::BITS`,
     // and shift-left with carry for `bits % Limb::BITS`.
-    let rem = n % bits;
-    let div = n / bits;
+    let rem = n % (bits as usize);
+    let div = n / (bits as usize);
     let is_zero = match div.is_zero() {
         true  => true,
         false => ishr_limbs(x, div),
@@ -1187,7 +1188,7 @@ pub fn ishl_bits<T>(x: &mut T, n: usize)
     where T: CloneableVecLike<Limb>
 {
     // Need to shift by the number of `bits % Limb::BITS)`.
-    let bits = Limb::BITS;
+    let bits: usize = Limb::BITS as usize;
     debug_assert!(n < bits);
     if n.is_zero() {
         return;
@@ -1247,7 +1248,7 @@ perftools_inline!{
 pub fn ishl<T>(x: &mut T, n: usize)
     where T: CloneableVecLike<Limb>
 {
-    let bits = Limb::BITS;
+    let bits = Limb::BITS as usize;
     // Need to pad with zeros for the number of `bits / Limb::BITS`,
     // and shift-left with carry for `bits % Limb::BITS`.
     let rem = n % bits;
@@ -2062,7 +2063,7 @@ fn calculate_remainder<T>(x: &[Limb], y: &[Limb], s: usize)
     let n = y.len();
     let mut r = T::default();
     r.reserve_exact(n);
-    let rs = Limb::BITS - s;
+    let rs = (Limb::BITS as usize) - s;
     for i in 0..n-1 {
         let xi = as_wide(x[i]) >> s;
         let xi1 = as_wide(x[i+1]) << rs;
