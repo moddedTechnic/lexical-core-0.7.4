@@ -1,7 +1,9 @@
 lexical-core
 ============
 
-**UNOFFICIAL**: this repo is a version of the described crate with some errors fixed from a reverse engineering challenge.
+# WARNING
+
+This repo is an **unofficial** version of the below described crate with some errors fixed from a reverse engineering challenge.
 The build and version labels have been removed from here to reflect this.
 
 ---
